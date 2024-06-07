@@ -36,9 +36,14 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <!-- FIXME ControllerやService側の処理とともに表示方法を考える -->
-                                <td th:each="stock, stat : ${stocks}" th:text="${stock}"></td>
+                            <tr th:each="stock,stat : ${stocks}">
+                                <td th:text="${stock[0]}">Book Title</td>
+                                <td th:text="${stock[1]}">Stock</td>
+                                <!-- 他の列にデータがあればそれを追加 -->
+                                <td th:each="day, iterStat : ${#numbers.sequence(3, daysInMonth + 2)}">
+                                    <span th:if="${stock[iterStat.index + 3] == '0'}">❌</span>
+                                    <a th:unless="${stock[iterStat.index + 3] == '0'}" th:text="${stock[iterStat.index + 3]}" th:href="@{/rental/add(bookId = ${stock[2]}, expectedRentalOn=${targetYear + '/' + targetMonth + '/' + (day-2)})}"></a>
+                                </td>
                             </tr>
                         </tbody>
                     </table>

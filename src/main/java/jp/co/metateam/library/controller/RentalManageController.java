@@ -1,7 +1,9 @@
 package jp.co.metateam.library.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -20,8 +22,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import jp.co.metateam.library.constants.Constants;
 import jp.co.metateam.library.model.Account;
 import jp.co.metateam.library.model.Stock;
+import jp.co.metateam.library.repository.RentalManageRepository;
+import jp.co.metateam.library.repository.StockRepository;
+
 import org.springframework.web.bind.annotation.PathVariable;
 import jp.co.metateam.library.values.RentalStatus;
 import java.util.Optional;
@@ -66,20 +74,37 @@ public class RentalManageController {
         return "rental/index";
     }
 
-
+    
 
     @GetMapping("/rental/add")
-    public String add(Model model) {
+    public String add(@RequestParam("bookId")String bookId ,@RequestParam("expectedRentalOn")Date date, Model model ) {
+
+
         List<Account> accountList = this.accountService.findAll();
         List<Stock> stockList = this.stockService.findAll();
 
         model.addAttribute("accounts", accountList);
         model.addAttribute("stockList", stockList);
         model.addAttribute("rentalStatus", RentalStatus.values());
+        
+
+        
 
         if (!model.containsAttribute("rentalManageDto")) {
-            model.addAttribute("rentalManageDto", new RentalManageDto());
+
+            RentalManageDto rentalManageDto = new RentalManageDto();
+
+            if (bookId != null) {
+                rentalManageDto.setStockId(bookId);
+            }
+    
+            if (date != null) {
+                rentalManageDto.setExpectedRentalOn(date);
+            }
+            model.addAttribute("rentalManageDto", rentalManageDto);
         }
+
+        
 
         return "rental/add";
     }
