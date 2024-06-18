@@ -31,6 +31,10 @@ public interface StockRepository extends JpaRepository<Stock, Long> {
 
     @Query("SELECT COUNT (st) FROM Stock st" + 
             " inner join RentalManage rm on rm.stock.id = st.id" +//在庫管理番号をキーにしてRentalManageと内部結合、「RentalManage」はmodelの指定してるやつと一緒じゃないといけない
-            " WHERE (st.bookMst.id =?1 AND rm.status in (0,1) AND rm.expectedRentalOn <= ?2 AND ?2 <= rm.expectedReturnOn)")//?のパラメータに
+            " WHERE (st.bookMst.id =?1 AND rm.status in (0,1) AND rm.expectedRentalOn <= ?2 AND ?2 <= rm.expectedReturnOn)")
     int countDatesBetweenRentalAndReturn(Long bookId, Date date);
+
+    
+
+
 }

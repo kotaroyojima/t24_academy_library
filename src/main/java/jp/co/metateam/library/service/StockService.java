@@ -6,11 +6,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -72,8 +75,8 @@ public class StockService {
     }
 
     @Transactional
-    public List<String> findByAvailableStockId(String bookId, Date date){
-        List<String> AvailableStockId = this.rentalManageRepository.findByAvailableStockId(bookId, date);
+    public List<String> findByAvailableStockId(String stockId, Date date){
+        List<String> AvailableStockId = this.rentalManageRepository.findByAvailableStockId(stockId, date);
         return AvailableStockId;
     }
 
@@ -140,27 +143,48 @@ public class StockService {
         calendar.clear();
         calendar.set(year,month-1,daysInMonth,0,0,0);//month-1っちいうのはこいつの性質、これで正確な時間のカレンダーがセットされる
         Date date = calendar.getTime();
+        Date day = calendar.getTime();
         List<BookMst> books = bookMstRepository.findAll();
         List<String> AvailableId = findByAvailableStockId(stock.getId(),date);
         int bookNum = books.size();
         String [][] bookCalendar = new String[bookNum][daysInMonth+3];
-    
-        for (int i = 0; i < books.size(); i++) {
+        
+        
+        
+        for (int i = 0; i < bookNum; i++) {
             BookMst book = books.get(i);
             String bookTitle = book.getTitle(); // 対象の書籍名
             int stockCount = countByStockIdAndStatusIn(book.getId()); // 対象書籍の在庫総数
+            int unAvailableStockCount = this.stockRepository.countByStockIdAndStatusIn(book.getId(),Constants.STOCK_UNAVAILABLE);
+
+
             bookCalendar[i][0] = bookTitle;
-            bookCalendar[i][1] = String.valueOf(stockCount);
-            bookCalendar[i][2] = AvailableId.get(i);
+            bookCalendar[i][1] = String.valueOf(stockCount - unAvailableStockCount);
+
+            if (!AvailableId.isEmpty()){
+                bookCalendar[0][2] = AvailableId.get(0);
+                bookCalendar[1][2] = AvailableId.get(2);
+                bookCalendar[2][2] = AvailableId.get(3);
+                bookCalendar[3][2] = AvailableId.get(4);
+                bookCalendar[4][2] = AvailableId.get(5);
+                
+                
+                
+                
+                
+                
+            }
+            
+            
+            
 
             
 
             for (int j = 3; j < daysInMonth+3; j++) {
                 calendar.set(year,month-1,j-2,0,0,0);//month-1っちいうのはこいつの性質、j-1はdaysInMonthで+2しちゃってるから、これで正確な時間のカレンダーがセットされる
-                Date day = calendar.getTime();
                 int rentalAvailableCount = countDatesBetweenRentalAndReturn(book.getId(),day); 
                 // 在庫総数から貸出数を引く
-                int remainingStockCount = stockCount - rentalAvailableCount;
+                int remainingStockCount = stockCount - unAvailableStockCount - rentalAvailableCount;
                 bookCalendar[i][j] = String.valueOf(remainingStockCount);
             }
         }

@@ -11,7 +11,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import jp.co.metateam.library.model.RentalManage;
-import jp.co.metateam.library.service.StockService;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -39,18 +38,15 @@ public interface RentalManageRepository extends JpaRepository<RentalManage, Long
  
         List<RentalManage> findByStockIdAndStatusIn2(String StockId);
 
-        @Query("SELECT st.id "
+        @Query("SELECT st.id"
                 + " from Stock st"
                 + " join bookMst bm on st.bookMst.id = bm.id"
                 + " left join RentalManage rm on st.id = rm.stock.id"
-                + " where(st.bookMst.id = ?1 and rm.expectedRentalOn >= ?2 or ?2 >= rm.expectedReturnOn)"
-                + " and st.status in (0)")
-                //"FROM Stock st " +
-                //"INNER JOIN st.bookMst bm " +
-                //"INNER JOIN RentalManage rm ON rm.stock.id = st.id " +
-                //"WHERE (bm.id = ?1 AND rm.expectedRentalOn >= ?2 AND ?2 >= rm.expectedReturnOn) " +
-                //"AND st.status = 0")
+                + " where(bm.id = ?1 and rm.expectedRentalOn >= ?2 or ?2 >= rm.expectedReturnOn)"
+                + " and st.status in (0)"
+                + " GROUP BY st.id"
+                + " ORDER BY st.bookMst.id ASC")
 
-        List<String> findByAvailableStockId(String bookId, Date date);
+        List<String> findByAvailableStockId(String stockId, Date date);
 
 }

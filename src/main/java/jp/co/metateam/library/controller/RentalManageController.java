@@ -74,11 +74,11 @@ public class RentalManageController {
         return "rental/index";
     }
 
-    
+
 
     @GetMapping("/rental/add")
-    public String add(@RequestParam("bookId")String bookId ,@RequestParam("expectedRentalOn")Date date, Model model ) {
-
+    public String add(@RequestParam( value = "stockId", required = false)String stockId ,@RequestParam(value = "expectedRentalOn" ,required = false)Date date, Model model ) {
+        
 
         List<Account> accountList = this.accountService.findAll();
         List<Stock> stockList = this.stockService.findAll();
@@ -94,8 +94,8 @@ public class RentalManageController {
 
             RentalManageDto rentalManageDto = new RentalManageDto();
 
-            if (bookId != null) {
-                rentalManageDto.setStockId(bookId);
+            if (stockId != null) {
+                rentalManageDto.setStockId(stockId);
             }
     
             if (date != null) {
